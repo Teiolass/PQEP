@@ -1,0 +1,554 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{amsmath}
+\usepackage{nicematrix}
+\usetheme{Copenhagen}
+\beamertemplatenavigationsymbolsempty
+\setbeamertemplate{footline}[frame number]
+
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\title[Risoluzione di PQEP]{Un Algoritmo per la Risoluzione del Problema
+Palindromo Quadratico degli Autovalori }
+\author{Alessio Marchetti}
+\date{}
+
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Presentazione del problema}
+    Si vogliono trovare autovalori e autovettori del seguente polinomio
+    matriciale:
+    \[
+        P(\lambda) = \lambda^2 A^T + \lambda Q + A
+    \]
+    dove
+    \[
+        A = 
+        \begin{pmatrix}
+            0 & H1 \\
+            0 & 0
+        \end{pmatrix}
+        \qquad
+        Q = 
+        \begin{pmatrix}
+            H0 & H1 & 0\\
+            H1^T & H0 & H1 \\
+            0 & \ddots & \ddots & \ddots 
+        \end{pmatrix}.
+    \]
+    Inoltre $H_0$ \`e simmetrica.
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Simmetrie del problema}
+    Poich\'e
+    \[
+        P(\lambda)^T = \lambda^2 A + \lambda Q + A^T = \lambda^2
+        P\left(\frac{1}{\lambda}\right)
+    \]
+    se $\mu$ \`e un autovalore per $P$, anche $1/\mu$ \`e.
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Alcune soluzioni facili}
+    Per la struttura di
+    \[ % @todo: riaggiorna qui
+        A = 
+        \begin{pmatrix}
+            0 & H1 \\
+            0 & 0
+        \end{pmatrix}
+    \]
+    si ha che $0$ \`e un autovalore di molteplicit\`a (almeno) $(m-1)k$ e i
+    relativi autovettori sono gli elementi della base canonica $e_1, \dots,
+    e_{(m-1)k}$.
+
+    In maniera analoga $\infty$ \`e autovalore di uguale molteplicit\`a e i
+    relativi autovettori sono gli ultimi $(m-1)k$ vettori della base canonica.
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Strategia generale}
+    Vogliamo dunque calcolare le soluzioni ``meno facili''.
+
+    Useremo questi due step:
+    \begin{enumerate}
+        \item Si risolve il problema per $\hat{P}(\lambda) = \lambda^2 H_1^T +
+            \lambda H_0 + H_1$.
+        \item Si utilizzano le soluzioni di $\hat{P}$ per costruire quelle di
+            $P$.
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Una scomposizione utile}
+    Supponiamo che $\hat{\Phi}$ sia una soluzione simmetrica per $X$
+    dell'equazione
+    \[
+        X + H_1^T X^{-1} H_1 = H_0.
+    \]
+    Allora possiamo scomporre
+    \[
+        \hat{P}(\lambda) = \lambda^2 H_1^T + \lambda H_0 + H_1 = 
+        (\lambda H_1^T + \hat{\Phi})\hat{\Phi}^{-1}(\lambda \hat{\Phi} + H_1).
+    \]
+    Si nota che se $v^T(\mu \hat{\Phi} + H_1)=0$, allora anche $\left(
+    \frac{1}{\mu}  H_1^T + \hat{\Phi}\right)v=0$,  per cui gli autovettori
+    sinistri dell'ultimo fattore sono gli autovettori destri del primo. 
+
+    Gli autovalori relativi ad essi sono uno il reciproco dell'altro.
+\end{frame}
+
+\begin{frame}
+\frametitle{Trovare le soluzioni}
+    Valeva
+    \[
+        \hat{P}(\lambda) = (\lambda H_1^T + \hat{\Phi})\hat{\Phi}^{-1}(\lambda
+        \hat{\Phi} + H_1).
+    \]
+    Se $(\mu, v)$ \`e una coppia autovalore e autovettore per $\lambda
+    \hat{\Phi} + H_1$, allora lo \`e anche per $\hat{P}$. \\~\
+
+    Se $(\bar{\mu}, \bar{v})$ \`e una coppia per $\lambda H_1^T + \hat{\Phi}$ e
+    vale $\bar{v} = \hat{\Phi}^{-1}(\bar{\mu} \hat{\Phi} + H_1)v$, allora
+    $(\bar{\mu}, v)$ \`e una soluzione per $\hat{P}$. \\~\
+
+    Quindi dati $(\bar{v}, \mu)$ una coppia di autovalore e autovettore sinistro
+    per l'ultimo termine, la coppia $1/\mu, v$ \`e una coppia per $\hat{P}$,
+    con $v$ come sopra.
+\end{frame}
+
+\begin{frame}
+\frametitle{Il Doubling Algorithm}
+    Bisogna determinare una soluzione di $\Phi$. Si usa l'algoritmo iterativo in
+    cui
+    \[
+        A_0 = H_1 \qquad X_0 = H_0 \qquad Y_0 = 0
+    \]
+    e il  passo iterativo \`e dato da
+    \begin{align*}
+        A_{i+1} &= A_i(X_i-Y_i)^{-1}A_i \\
+        X_{i+1} &= X_i - A_i^T(X_i-Y_i)^{-1}A_i \\
+        Y_{i+1} &= Y_i + A_i(X_i-Y_i)^{-1}A_i^T.
+    \end{align*}
+
+    Si ha che $X_i$ converge alla soluzione $\hat{\Phi}$.
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Convergenza}
+    \`E stato dimostrato che se $Im(H_0)+\lambda Im(H_1)^T +
+    \lambda^{-1}Im(H_1)$ \`e definita positiva per tutti i $\lambda$ sulla
+    circonferenza unitaria, esiste una soluzione $\hat{\Phi}$ simmetrica e
+    invertibile per cui $\rho(\hat{\Phi}^{-1}H_1) < 1$, dove $\rho$ \`e il
+    raggio spettrale. \\~\
+
+    In questo caso la convergenza \`e quadratica e vale che
+    \[
+        \limsup_{i\rightarrow\infty} \norm{X_i-\hat{\Phi}} \leq
+        (\hat{\Phi}^{-1}H_1)^{2^{i+1}}
+    \]
+\end{frame}
+
+\begin{frame}
+\frametitle{Criterio di arresto}
+    Siccome la convergenza \`e quadratica, vale che esiste una costante $\alpha$
+    e un indice $i$ per cui per tutti i $j\geq i$ vale che
+    \[
+        \norm{X_{j+2}-X_{j+1}}\leq \alpha \norm{X_{j+1}-X_j}^2.
+    \]
+    Allora se $\epsilon = \norm{X_{i+1}-X_i}$ si pu\`o valutare
+    \begin{align*}
+        \norm{X_i-\hat{\Phi}} &= \norm{\sum_{j=i}^{\infty} (X_{j+1}-X_j)} \leq
+        \sum_{j=i}^{\infty} \norm{X_{j+1}-X_j} \\
+        &\leq \epsilon + \sum_{j=i}^\infty \alpha^{2j-1} \epsilon^{2j} =
+        \epsilon + \frac{\alpha^2\epsilon^2}{\alpha(1-\alpha^2\epsilon^2)}
+        \doteq \epsilon
+    \end{align*}
+
+    Si ha dunque che il rapporto $\norm{X_{i+1}-X_i}/\norm{X_i}<\epsilon_T$ con
+    $\epsilon_T$ dell'ordine dell'espilon di macchina \`e una buona condizione
+    d'arresto per l'algoritmo.
+\end{frame}
+
+\begin{frame}
+\frametitle{Teorema}
+    Supponiamo che $P$ e $\hat{P}$ siano entrambi regolari, per cui vale che il
+    loro determinante non \`e identicamente nullo al variare di $\lambda$.
+    Allora vale che $\hat{P}$ ha un coppia decomponibile
+    \[
+        ((J_0\oplus J_1 \oplus J_\infty, [Y_0, Y_1, Y_\infty]).
+    \]
+    Cio\`e le matrici soddisfano le propriet\`a
+    \[
+        \begin{pNiceMatrix}
+            Y_0 & Y_1 & Y_\infty J_\infty \\
+            Y_0J_0 & Y_1 J_1 & Y_\infty
+        \end{pNiceMatrix}
+        \text{ \`e non singolare},
+    \]
+    per $i=0,1$
+    \begin{align*}
+        H_1^T Y_i J_i^2 + H_0 Y_iJ_i + H_1 Y_i=0 \\
+        H_1^T Y_\infty + H_0 Y_\infty J_\infty + H_1 Y_\infty J_\infty^2 = 0
+    \end{align*}
+    e $J_0$ ha solo autovalori nulli, mentre $J_1$ ha solo autovalori non nulli.
+\end{frame}
+
+\begin{frame}
+    Siano
+    \[
+        Z_0 = 
+        \begin{pNiceMatrix}
+            I & 0 \\
+            0 & Y_0
+        \end{pNiceMatrix}
+        ;\qquad
+        Z_1 = 
+        \begin{pNiceMatrix}
+            Y_1\\
+            \vdots\\
+            Y_1J_1^{m-1}
+        \end{pNiceMatrix}
+        ;\qquad
+        Z_\infty = 
+        \begin{pNiceMatrix}
+            Y_\infty & 0 \\
+            0 & I
+        \end{pNiceMatrix}
+        ;
+    \]\[
+        W_f = 0_{n-k+k_0} \oplus J_1^m
+        ;\qquad
+        W_\infty = 0_{n-k+k_0}
+    \]
+
+    Supponiamo che $J_0=J_\infty=0_{k_0}$.
+
+    Allora 
+    \[
+        (W_f \oplus W_\infty, [Z_0, Z_1, Z_\infty])  
+    \]
+    \`e una coppia decomponibile per $P$.
+\end{frame}
+
+\begin{frame}
+    Questo vuol dire verificare che la matrice
+    \[
+        \begin{pNiceMatrix}
+            Z_0 &  Z_1 & 0 \\
+            0 & Z_1J_1^m & Y_\infty
+        \end{pNiceMatrix}
+    \]
+    \`e invertibile e che valgono
+    \[
+        AZ_0 = 0;
+    \]
+    \[
+        A^TZ_\infty=0;
+    \]
+    \[
+        A^TZ_1J_1^{2m} + QZ_1J_1^m + AZ_1 = 0.
+    \]
+    Nelle prime due equazioni i due addendi nulli che includevano $J_0$ e
+    $J_\infty$ non sono stati scritti.
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Dimostrazione}
+    Per l'invertibilit\`a,
+    \[
+        \begin{pNiceMatrix}
+            Z_0 &  Z_1 & 0 \\
+            0 & Z_1J_1^m & Y_\infty
+        \end{pNiceMatrix}
+        = 
+        \begin{pNiceMatrix}
+            I & 0   &  Z_1'  & 0 & 0\\
+            0 & Y_0 &  Y_1J_1^{m-1} & 0 & 0 \\
+            0 & 0   &  Y_1J_1^m      & Y_\infty & 0 \\
+            0 & 0   &  (Z_1J_1^m)'  & 0 & I
+        \end{pNiceMatrix}
+    \]
+    che per eliminazione delle colonne \`e invertibile se e solo se lo \`e
+    \[
+        \begin{pNiceMatrix}
+            Y_0 &  Y_1J_1^{m-1} & 0 \\
+            0   &  Y_1J_1^m      & Y_\infty
+        \end{pNiceMatrix}
+        = 
+        \begin{pNiceMatrix}
+            Y_0 &  Y_1 & 0 \\
+            0   &  Y_1J_1 & Y_\infty
+        \end{pNiceMatrix}   
+        \begin{pNiceMatrix}
+            I & & \\
+            & J_1^{m-1} & \\
+            & & I
+        \end{pNiceMatrix}   
+    \]
+\end{frame}
+
+\begin{frame}
+    Per ipotesi si sa che 
+    \[
+        H_1Y_0 = 0; \qquad H_1^T Y_\infty=0.
+    \]
+    Allora per la struttura a blocchi di $A$, valgono le prime due equazioni
+    della tesi, infatti
+    \[
+        A Z_0= 
+        \begin{pNiceMatrix}
+            0 & H_1\\
+            0 & 0
+        \end{pNiceMatrix}   
+        \begin{pNiceMatrix}
+            I & 0\\
+            0 & Y_0
+        \end{pNiceMatrix}   
+        = 
+        \begin{pNiceMatrix}
+            0 & H_1Y_0\\
+            0 & 0
+        \end{pNiceMatrix}.
+    \]
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Alcuni commenti}
+    La condizione $J_0=J_\infty=0$ \`e automaticamente soddisfatta se queste due
+    matrici hanno dimensione nulla, cio\`e quando $H_1$ \`e invertibile. \\~\
+
+    La scomposizione fatta della coppia decomponibile conferma il discorso sulle
+    molteplicit\`a di $0$ e  di $\infty$ fatto prima.
+\end{frame}
+
+\begin{frame}
+\frametitle{Soluzioni di $P$}
+    Sia $(J_f,X_f)$ la parte corrispondente agli autovalori finiti di un
+    polinomio matriciale $P(\lambda)=\sum_{i=0}^l D_i\lambda^i$
+
+    Con una trasformazione del tipo
+    \begin{align*}
+        X_f&\longrightarrow X_fQ\\
+        J_f&\longrightarrow Q^{-1}J_fQ
+    \end{align*}
+    per un'opportuna matrice di cambio di base $Q$ si pu\`o supporre che $J$ sia
+    di Jordan.
+    \end{frame}
+
+    \begin{frame}
+    Infatti 
+    \[
+        \begin{pNiceMatrix}
+            X_fQ & X_\infty J_\infty^{l-1}\\
+            \vdots & \vdots\\
+            X_fJ_f^{l-1}Q & X_\infty
+        \end{pNiceMatrix}
+        =
+        \begin{pNiceMatrix}
+            X_f & X_\infty J_\infty^{l-1}\\
+            \vdots & \vdots\\
+            X_fJ_f^{l-1} & X_\infty
+        \end{pNiceMatrix}
+        \begin{pNiceMatrix}
+            Q & 0\\
+            0 & I
+        \end{pNiceMatrix}
+    \]
+    e
+    \[
+        0=\sum_{i=0}^l D_i X_f J_f^i =  
+        \sum_{i=0}^l D_i (X_fQ) (Q^{-1}J_fQ)^i.
+    \]
+\end{frame}
+
+
+\begin{frame}
+    Vale che se $\mu$ \`e un autovalore per $J$, allora $\mu^m$ \`e un
+    autovalore per $J^m$. \\~\
+
+    Dunque data una soluzione di autovalore e autovettore $(\mu, v)$ per
+    $\hat{P}$ \`e possibile trovare la soluzione per $P$
+    \[
+        \left(\mu^m, 
+        \begin{pNiceMatrix}
+            v \\
+            v\mu\\
+            \vdots\\
+            v\mu^{m-1}
+        \end{pNiceMatrix}
+        \right)
+    \]
+    leggendo l'equazione della coppia decomponibile sulle colonne corrispondenti
+    agli autovettori.
+\end{frame}
+
+\begin{frame} 
+\frametitle{Ricapitolando}
+    \begin{enumerate}
+        \item Si calcola $\hat{\Phi}$ con il doubling algorithm.
+        \item Si trovano trovano autovalori e autovettori destri e sinistri di
+            $\lambda H_1+\hat{\Phi}$ con il metodo QZ.
+        \item Si processano gli autovalori sinistri $v$ risolvendo il sistema
+            \[
+                (\mu H_1 + \hat{\Phi}) w = \hat{\Phi} v.
+            \]
+        \item Si ricavano le soluzioni di $P$ con il teorema precedente.
+    \end{enumerate}
+\end{frame} 
+
+
+\begin{frame}
+\frametitle{Ottimizzare il punto 3}
+    Avendo utilizzato il metodo QZ per risolvere il pencil $\lambda H_1
+    +\hat{\Phi}$ si dispone di due matrici unitarie $U$ e $V$ per cui vale
+    \[
+        UH_1V = G \qquad
+        U\hat{\Phi}V = T
+    \]
+    con $G$ e $T$ triangolari superiori. Allora il sistema da risolvere \`e
+    \[
+        U^H (\lambda G+T)V^Hw = U^HTV^Hv
+    \]
+    per cui si risolve
+    \[
+        (\lambda G+T)u = TV^Hv
+    \]
+    e poi
+    \[
+        V^Hw = u.
+    \]
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Analisi all'indietro dell'errore}
+    Sia $(\mu,v)$ una coppia di autovalre e autovettore calcolati per $P$.
+    Idealmente 
+    \[
+        r = (\mu^2A^T+\mu Q+A)v
+    \]
+    \`e nullo, ma in casi reali non lo \`e.
+
+    Cerchiamo delle perturbazioni nei dati iniziali $\Delta A$ e $\Delta Q$ per
+    cui
+    \[
+        [\mu^2 (A+\norm{A}\Delta A)^T + \mu (Q+\norm{Q}\Delta Q) +
+        (A+\norm{A}\Delta A)] v = 0
+    \]
+    dove la norma presa \`e quella di Frobenius e $\Delta Q$ \`e simmetrica.
+    A priori esistono infinite di queste matrici, ma quello a cui siamo
+    interessati \`e l'errore ottimo
+    \[
+        \epsilon = \min_{\Delta A, \Delta Q} \sqrt{\norm{\Delta A}^2 + 
+        \norm{\Delta A}^2}
+    \]
+\end{frame}
+
+\begin{frame}
+    \`E dimostrabile che 
+    \[
+        \epsilon = \sqrt{
+        \frac{\delta_1^2}{\norm{A}|1+\tau^2|^2 + \norm{Q} |\tau|^2}
+        \frac{\delta_2^2}{\norm{A}(1+\tau^4) + \norm{Q} |\tau|^2/2}
+        }
+    \]
+    dove
+    \[
+        \delta_1 = \frac{v^T r}{\norm{v}^2} \qquad
+        \delta_2 = \frac{\sqrt{\norm{r}^2\norm{v}^2-|v^Tr|^2}}
+        {{\norm{v}^2}}
+    \]
+\end{frame}
+
+\begin{frame}
+\frametitle{Errore strutturato}
+    Le perturbazioni studiate non rispettano la strutture a blocchi delle
+    matrici iniziali. Consideriamo allora delle perturbazioni che hanno la
+    struttura del problema, partendo da matrici perturbate $H_0+\norm{H_0}\Delta 
+    H_0$ e $H_1+\norm{H_1}\Delta H_1$.
+    Chiameremo l'errore $\epsilon$ in questo caso errore all'indietro
+    $\alpha$-strutturato $\epsilon_\alpha$.
+
+    Consideriamo la coppia $(\eta, w)=(\mu^{1/m}, v_{1:k})$ a cui si pu\`o
+    associare il vettore
+    \[
+        \hat{r} = (\eta^2H_1^T+\eta H_0 + H_1)w
+    \]
+    e l'errore
+    \[
+        \hat{\epsilon} = \min_{\Delta H_1, \Delta H_1} \sqrt{\norm{\Delta H_1}^2
+        + \norm{\Delta H_0}^2}
+    \]
+    Metteremo in relazione $\epsilon$ e $\epsilon_\alpha$.
+\end{frame}
+
+
+\begin{frame}
+    Per prima cosa notiamo che le perturbazioni $\alpha$-strutturate hanno norma
+    \[
+        \norm{\Delta A} = \norm{\Delta H_1}
+    \]
+    e
+    \[
+        \norm{Q}^2 = m\norm{H_0}^2 + (2m-2)\norm{H_1}^2
+    \]
+    \[
+        \norm{Q}^2\norm{\Delta Q}^2 = m\norm{H_0}^2 \norm{\Delta H_0} +
+        (2m-2)\norm{H_1}^2 \norm{\Delta H_1}^2.
+    \]
+    Allora 
+    \begin{align*}
+        \norm{A}^2+\norm{Q}^2 =& \norm{H_1}^2 + \frac
+        {m\norm{H_0}^2 \norm{\Delta H_0} + (2m-2)\norm{H_1}^2 \norm{\Delta
+        H_1}^2}
+        {m\norm{H_0}^2 + (2m-2)\norm{H_1}^2}\\
+        \leq& \left( 1 + \frac{(2m-2)\norm{H_1}^2}{m\norm{H_0}^2 + (2m-2)
+        \norm{H_1}^2}\right)(\norm{H_1}^2+\norm{H_0}^2)
+    \end{align*}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Sulla precisione degli autovalori}
+    Il metodo presentato \`e anche vantaggioso rispetto alla precisione.
+    Supponiamo di saper calcolare direttamente gli autovalori di $P$. Essi
+    saranno corretti a meno di un termine dell'ordine dell'epsilon di macchina.
+    \[
+        \mu_{calc} = \mu_{esatto} + O(u) = \mu_{esatto} \left(1+\frac {O(u)}
+        {|\mu_{esatto}|}\right).
+    \]
+    Stesso discorso per le soluzioni di $\hat{P}$.
+    \[
+        \hat{\mu}_{calc} = \hat{\mu}_{esatto} + O(u) = \hat{\mu}_{esatto}
+        \left(1+\frac {O(u)} {|\hat{\mu}_{esatto}|}\right).
+    \]
+    Se $\hat{\mu}$ viene usato per calcolare $\mu$ come nel metodo proposto si
+    ottiene che
+    \[
+        \mu_{calc} = \hat{\mu}_{esatto}^m \left(1+\frac {O(u)}
+        {|\hat{\mu}_{esatto}|}\right)^m
+        = \mu_{esatto} \left[1+O\left(m\frac {u}
+        {{\mu_{esatto}}^{1/m}}\right)\right]
+    \]
+\end{frame}
+
+
+\end{document}

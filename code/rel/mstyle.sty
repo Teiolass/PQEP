@@ -1,0 +1,63 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mstyle}[]
+
+\usepackage{enumerate}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{dsfont}
+\usepackage{subcaption}
+\usepackage[section]{placeins}
+\usepackage{float}
+\graphicspath{ {./img/} }
+
+\newcounter{basicblock}[section]
+\renewcommand{\thebasicblock}{\thesection.\arabic{basicblock}}
+\newenvironment{block}[1][]
+{\refstepcounter{basicblock}\par\medskip\noindent\textbf{#1~\thebasicblock}\quad}
+{ 
+\medskip}
+ 
+\newenvironment{nlist}[1][i]
+{\begin{enumerate}[(#1)]
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\topsep}{0pt}
+    \setlength{\parsep}{0pt}}
+{\end{enumerate}}
+
+\newcommand{\vect}{\overrightarrow}
+\renewcommand{\implies}{\Rightarrow}
+\let\forallalias\forall
+\renewcommand{\forall}{\forallalias\ }
+\renewcommand{\epsilon}{\varepsilon }
+\newcommand{\setof}[1]{\{#1\}}
+\newcommand{\prob}[1]{\mathbb{P}\ [#1]}
+\def\code#1{\texttt{#1}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\ind}{\mathds{1}}
+\newcommand{\st}{\ \$\ }
+\lstset{
+    frame=l,
+    language=Python,
+    basicstyle=\fontsize{9}{9}\selectfont\ttfamily,
+    aboveskip=3mm,
+    belowskip=3mm,
+    showstringspaces=false,
+    columns=fixed,
+    numbers=left,
+    numberstyle=\tiny,
+    keywordstyle=\bfseries,
+    %commentstyle=\color{dkgreen},
+    %stringstyle=\color{mauve},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    texcl=true 
+    escapeinside={//}{\^^M}
+}
+\newcommand*{\tran}{^{\mkern-1.5mu\mathsf{T}}}
+\newcommand*{\herm}{^{\mkern-1.5mu\mathsf{H}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
