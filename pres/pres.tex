@@ -34,14 +34,14 @@ Palindromo Quadratico degli Autovalori }
     \[
         A = 
         \begin{pmatrix}
-            0 & H1 \\
+            0 & H_1 \\
             0 & 0
         \end{pmatrix}
         \qquad
         Q = 
         \begin{pmatrix}
-            H0 & H1 & 0\\
-            H1^T & H0 & H1 \\
+            H_0 & H_1^T & 0\\
+            H_1 & H_0 & H_1^T \\
             0 & \ddots & \ddots & \ddots 
         \end{pmatrix}.
     \]
@@ -67,7 +67,7 @@ Palindromo Quadratico degli Autovalori }
     \[ % @todo: riaggiorna qui
         A = 
         \begin{pmatrix}
-            0 & H1 \\
+            0 & H_1 \\
             0 & 0
         \end{pmatrix}
     \]
@@ -133,7 +133,7 @@ Palindromo Quadratico degli Autovalori }
 
 \begin{frame}
 \frametitle{Il Doubling Algorithm}
-    Bisogna determinare una soluzione di $\Phi$. Si usa l'algoritmo iterativo in
+    Bisogna determinare una soluzione $\hat{\Phi}$. Si usa l'algoritmo iterativo in
     cui
     \[
         A_0 = H_1 \qquad X_0 = H_0 \qquad Y_0 = 0
